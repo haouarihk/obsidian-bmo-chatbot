@@ -622,19 +622,8 @@ export class BMOView extends ItemView {
                 try {
                     const url = 'https://api.anthropic.com/v1/complete';
                     const response = await requestUrlAnthropicAPI(url, this.settings, referenceCurrentNote, messageHistoryContent, maxTokens, temperature);
-
-                    const message = response.text;
-                    const lines = message.split('\n');
-                    let completionText = '';
-                
-                    for (const line of lines) {
-                      if (line.startsWith('data:')) {
-                        const eventData = JSON.parse(line.slice('data:'.length));
-                        if (eventData.completion) {
-                          completionText += eventData.completion;
-                        }
-                      }
-                    }
+					const result = await response.json;
+                    const completionText = result.completion;
 
                     if (messageContainerEl) {
                         const botMessages = messageContainerEl.querySelectorAll(".botMessage");
@@ -913,7 +902,7 @@ async function requestUrlAnthropicAPI(
         prompt:  `\n\nHuman: ${referenceCurrentNote}\n\n${settings.system_role}\n\n${messageHistoryString}\n\nAssistant:`,
         max_tokens_to_sample: parseInt(maxTokens) || 100000,
         temperature: temperature,
-        stream: true,
+        stream: false,
     };
   
     try {
